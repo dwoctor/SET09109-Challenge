@@ -233,6 +233,10 @@ class ControllerManager implements CSProcess{
 							playerMap.put(id, playerState)
 							pairsUnclaimed = pairsUnclaimed - 1
 							running = (pairsUnclaimed != 0)
+							if (running == false) {
+								def x = fromPlayers.read()
+								toPlayers[0].write(0)
+							}
 						}
 						else {
 							//println "cannot claim pair: $p1, $p2"

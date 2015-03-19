@@ -261,10 +261,10 @@ class ControllerManager implements CSProcess{
 					availablePlayerIds << id
 					availablePlayerIds =  availablePlayerIds.sort().reverse()
 				} // end else if chain
-			}
-		} // while running
-		createBoard()
-		dList.change(display, 0)
-	} // end while true
-} // end run
+			} // while running
+			createBoard()
+			dList.change(display, 0)
+		} // end while true
+	} // end run
+} // end class
 

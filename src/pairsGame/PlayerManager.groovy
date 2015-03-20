@@ -193,7 +193,7 @@ class PlayerManager implements CSProcess {
 					c = fromController.read()
 				}
 				
-				if (!c instanceof EndGame) {
+				if (c instanceof EndGame == false) {
 
 					if (refreshNeeded) {
 						chosenPairs = [null, null]

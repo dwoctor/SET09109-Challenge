@@ -260,8 +260,9 @@ class PlayerManager implements CSProcess {
 											break
 									} // end inner switch
 								} else if ( matchOutcome == 1) {
-									//								changePairs(p1[0], p1[1], Color.WHITE, -1) // Test just removing the light gray
-									//								changePairs(p2[0], p2[1], Color.WHITE, -1)
+								// Claimed pair -> color the pair white
+									changePairs(p1[0], p1[1], Color.WHITE, -1)
+									changePairs(p2[0], p2[1], Color.WHITE, -1)
 									toController.write(new ClaimPair ( id: myPlayerId,
 									gameId: gameId,
 									p1: chosenPairs[0],

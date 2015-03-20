@@ -118,7 +118,7 @@ class PlayerManager implements CSProcess {
 
 		Random rand = new Random()
 		def randomPort = rand.nextInt(7000 - 4000) + 4000
-		
+
 		// create Node and Net Channel Addresses
 		def nodeAddr = new TCPIPNodeAddress (randomPort)
 		Node.getInstance().init (nodeAddr)
@@ -145,7 +145,7 @@ class PlayerManager implements CSProcess {
 			IPlabel.write("Hi " + playerName + ", you are now enroled in the PAIRS game")
 			IPconfig.write(" ")
 
-			
+
 			def chosenPairs
 			def gameDetails
 			def gameId
@@ -153,12 +153,12 @@ class PlayerManager implements CSProcess {
 			def pairsMap
 			def playerIds
 			def pairLocs
-						
+
 			// main loop
 			while (enroled) {
-				
+
 				def c = fromController.read()
-				
+
 				chosenPairs = [null, null]
 				createBoard()
 				dList.change (display, 0)
@@ -179,10 +179,10 @@ class PlayerManager implements CSProcess {
 				pairLocs.each {loc ->
 					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
 				}
-				
+
 				def upendedcards = []
 				def refreshNeeded = false
-				
+
 				while (c instanceof ArrayList<E>) {
 					refreshNeeded = true
 					upendedcards << c
@@ -192,109 +192,110 @@ class PlayerManager implements CSProcess {
 					}
 					c = fromController.read()
 				}
-
-				if (refreshNeeded) {
-					chosenPairs = [null, null]
-					createBoard()
-					dList.change (display, 0)
-					toController.write(new GetGameDetails(id: myPlayerId))
-					gameDetails = (GameDetails)fromController.read()
-					gameId = gameDetails.gameId
-					IPconfig.write("Playing Game Number - " + gameId)
-					playerMap = gameDetails.playerDetails
-					pairsMap = gameDetails.pairsSpecification
-					playerIds = playerMap.keySet()
-					playerIds.each { p ->
-						def pData = playerMap.get(p)
-						playerNames[p].write(pData[0])
-						pairsWon[p].write(" " + pData[1])
-					}
-					// now use pairsMap to create the board
-					pairLocs = pairsMap.keySet()
-					pairLocs.each {loc ->
-						changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
-					}
-				}
-
-				def currentPair = 0
-				def notMatched = true
-
-
-				while ((chosenPairs[1] == null) && (enroled) && (notMatched)) {
-					getValidPoint.write (new GetValidPoint( side: side,
-					gap: gap,
-					pairsMap: pairsMap))
-					switch ( outerAlt.select() ) {
-						case WITHDRAW:
-							withdrawButton.read()
-							toController.write(new WithdrawFromGame(id: myPlayerId))
-							enroled = false
-							break
-						case VALIDPOINT:
-							def vPoint = ((SquareCoords)validPoint.read()).location
-							toController.write(vPoint)
-							chosenPairs[currentPair] = vPoint
-							currentPair = currentPair + 1
-							def pairData = pairsMap.get(vPoint)
-							changePairs(vPoint[0], vPoint[1], pairData[1], pairData[0])
-							def matchOutcome = pairsMatch(pairsMap, chosenPairs)
-							if ( matchOutcome == 2)  {
-								nextPairConfig.write("End Turn")
-								switch (innerAlt.select()){
-									case NEXT:
-										nextButton.read()
-										nextPairConfig.write(" ")
-										def p1 = chosenPairs[0]
-										def p2 = chosenPairs[1]
-										changePairs(p1[0], p1[1], Color.LIGHT_GRAY, -1)
-										changePairs(p2[0], p2[1], Color.LIGHT_GRAY, -1)
-										chosenPairs = [null, null]
-										currentPair = 0
-										notMatched = false
-										break
-									case WITHDRAW:
-										withdrawButton.read()
-										toController.write(new WithdrawFromGame(id: myPlayerId))
-										enroled = false
-										break
-								} // end inner switch
-							} else if ( matchOutcome == 1) {
-//								changePairs(p1[0], p1[1], Color.WHITE, -1) // Test just removing the light gray
-//								changePairs(p2[0], p2[1], Color.WHITE, -1)
-								toController.write(new ClaimPair ( id: myPlayerId,
-								gameId: gameId,
-								p1: chosenPairs[0],
-								p2: chosenPairs[1]))
-								notMatched = false
-							}
-							break
-					}// end of outer switch
-				} // end of while getting two pairs
-
-//				chosenPairs = [null, null]
-//				createBoard()
-//				dList.change (display, 0)
-//				toController.write(new GetGameDetails(id: myPlayerId))
-//				gameDetails = (GameDetails)fromController.read()
-//				gameId = gameDetails.gameId
-//				IPconfig.write("Playing Game Number - " + gameId)
-//				playerMap = gameDetails.playerDetails
-//				pairsMap = gameDetails.pairsSpecification
-//				playerIds = playerMap.keySet()
-//				playerIds.each { p ->
-//					def pData = playerMap.get(p)
-//					playerNames[p].write(pData[0])
-//					pairsWon[p].write(" " + pData[1])
-//				}
-//				// now use pairsMap to create the board
-//				pairLocs = pairsMap.keySet()
-//				pairLocs.each {loc ->
-//					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
-//				}
 				
-				def end = new EndTurn(id:myPlayerId)
-				toController.write(end)
+				if (!c instanceof EndGame) {
 
+					if (refreshNeeded) {
+						chosenPairs = [null, null]
+						createBoard()
+						dList.change (display, 0)
+						toController.write(new GetGameDetails(id: myPlayerId))
+						gameDetails = (GameDetails)fromController.read()
+						gameId = gameDetails.gameId
+						IPconfig.write("Playing Game Number - " + gameId)
+						playerMap = gameDetails.playerDetails
+						pairsMap = gameDetails.pairsSpecification
+						playerIds = playerMap.keySet()
+						playerIds.each { p ->
+							def pData = playerMap.get(p)
+							playerNames[p].write(pData[0])
+							pairsWon[p].write(" " + pData[1])
+						}
+						// now use pairsMap to create the board
+						pairLocs = pairsMap.keySet()
+						pairLocs.each {loc ->
+							changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
+						}
+					}
+
+					def currentPair = 0
+					def notMatched = true
+
+					while ((chosenPairs[1] == null) && (enroled) && (notMatched)) {
+						getValidPoint.write (new GetValidPoint( side: side,
+						gap: gap,
+						pairsMap: pairsMap))
+						switch ( outerAlt.select() ) {
+							case WITHDRAW:
+								withdrawButton.read()
+								toController.write(new WithdrawFromGame(id: myPlayerId))
+								enroled = false
+								break
+							case VALIDPOINT:
+								def vPoint = ((SquareCoords)validPoint.read()).location
+								toController.write(vPoint)
+								chosenPairs[currentPair] = vPoint
+								currentPair = currentPair + 1
+								def pairData = pairsMap.get(vPoint)
+								changePairs(vPoint[0], vPoint[1], pairData[1], pairData[0])
+								def matchOutcome = pairsMatch(pairsMap, chosenPairs)
+								if ( matchOutcome == 2)  {
+									nextPairConfig.write("End Turn")
+									switch (innerAlt.select()){
+										case NEXT:
+											nextButton.read()
+											nextPairConfig.write(" ")
+											def p1 = chosenPairs[0]
+											def p2 = chosenPairs[1]
+											changePairs(p1[0], p1[1], Color.LIGHT_GRAY, -1)
+											changePairs(p2[0], p2[1], Color.LIGHT_GRAY, -1)
+											chosenPairs = [null, null]
+											currentPair = 0
+											notMatched = false
+											break
+										case WITHDRAW:
+											withdrawButton.read()
+											toController.write(new WithdrawFromGame(id: myPlayerId))
+											enroled = false
+											break
+									} // end inner switch
+								} else if ( matchOutcome == 1) {
+									//								changePairs(p1[0], p1[1], Color.WHITE, -1) // Test just removing the light gray
+									//								changePairs(p2[0], p2[1], Color.WHITE, -1)
+									toController.write(new ClaimPair ( id: myPlayerId,
+									gameId: gameId,
+									p1: chosenPairs[0],
+									p2: chosenPairs[1]))
+									notMatched = false
+								}
+								break
+						}// end of outer switch
+					} // end of while getting two pairs
+
+					//				chosenPairs = [null, null]
+					//				createBoard()
+					//				dList.change (display, 0)
+					//				toController.write(new GetGameDetails(id: myPlayerId))
+					//				gameDetails = (GameDetails)fromController.read()
+					//				gameId = gameDetails.gameId
+					//				IPconfig.write("Playing Game Number - " + gameId)
+					//				playerMap = gameDetails.playerDetails
+					//				pairsMap = gameDetails.pairsSpecification
+					//				playerIds = playerMap.keySet()
+					//				playerIds.each { p ->
+					//					def pData = playerMap.get(p)
+					//					playerNames[p].write(pData[0])
+					//					pairsWon[p].write(" " + pData[1])
+					//				}
+					//				// now use pairsMap to create the board
+					//				pairLocs = pairsMap.keySet()
+					//				pairLocs.each {loc ->
+					//					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
+					//				}
+
+					def end = new EndTurn(id:myPlayerId)
+					toController.write(end)
+				} // end of if game over
 			} // end of while enrolled loop
 			IPlabel.write("Goodbye " + playerName + ", please close game window")
 		} //end of enrolling test

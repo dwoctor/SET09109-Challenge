@@ -155,6 +155,27 @@ class PlayerManager implements CSProcess {
 			def pairsMap
 			def playerIds
 			def pairLocs
+			
+			chosenPairs = [null, null]
+			createBoard()
+			dList.change (display, 0)
+			toController.write(new GetGameDetails(id: myPlayerId))
+			gameDetails = (GameDetails)fromController.read()
+			gameId = gameDetails.gameId
+			IPconfig.write("Playing Game Number - " + gameId)
+			playerMap = gameDetails.playerDetails
+			pairsMap = gameDetails.pairsSpecification
+			playerIds = playerMap.keySet()
+			playerIds.each { p ->
+				def pData = playerMap.get(p)
+				playerNames[p].write(pData[0])
+				pairsWon[p].write(" " + pData[1])
+			}
+			// now use pairsMap to create the board
+			pairLocs = pairsMap.keySet()
+			pairLocs.each {loc ->
+				changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
+			}
 
 			// main loop
 			while (enroled) {
@@ -276,28 +297,6 @@ class PlayerManager implements CSProcess {
 								break
 						}// end of outer switch
 					} // end of while getting two pairs
-
-					//				chosenPairs = [null, null]
-					//				createBoard()
-					//				dList.change (display, 0)
-					//				toController.write(new GetGameDetails(id: myPlayerId))
-					//				gameDetails = (GameDetails)fromController.read()
-					//				gameId = gameDetails.gameId
-					//				IPconfig.write("Playing Game Number - " + gameId)
-					//				playerMap = gameDetails.playerDetails
-					//				pairsMap = gameDetails.pairsSpecification
-					//				playerIds = playerMap.keySet()
-					//				playerIds.each { p ->
-					//					def pData = playerMap.get(p)
-					//					playerNames[p].write(pData[0])
-					//					pairsWon[p].write(" " + pData[1])
-					//				}
-					//				// now use pairsMap to create the board
-					//				pairLocs = pairsMap.keySet()
-					//				pairLocs.each {loc ->
-					//					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
-					//				}
-
 					def end = new EndTurn(id:myPlayerId)
 					toController.write(end)
 				} else { // end of if game over

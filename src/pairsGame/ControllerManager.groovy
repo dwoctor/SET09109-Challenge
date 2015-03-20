@@ -152,7 +152,7 @@ class ControllerManager implements CSProcess{
 			}
 		} // end clearBoard
 		// create a Node and the fromPlayers net channel
-		def nodeAddr = new TCPIPNodeAddress ("127.0.0.1", 3000)
+		def nodeAddr = new TCPIPNodeAddress (3000)
 		Node.getInstance().init (nodeAddr)
 		IPlabelConfig.write(nodeAddr.getIpAddress())
 		//println "Controller IP address = ${nodeAddr.getIpAddress()}"

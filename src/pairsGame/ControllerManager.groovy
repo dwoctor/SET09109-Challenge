@@ -152,7 +152,7 @@ class ControllerManager implements CSProcess{
 			}
 		} // end clearBoard
 		// create a Node and the fromPlayers net channel
-		def nodeAddr = new TCPIPNodeAddress (3000)
+		def nodeAddr = new TCPIPNodeAddress ("127.0.0.1", 3000)
 		Node.getInstance().init (nodeAddr)
 		IPlabelConfig.write(nodeAddr.getIpAddress())
 		//println "Controller IP address = ${nodeAddr.getIpAddress()}"
@@ -171,6 +171,8 @@ class ControllerManager implements CSProcess{
 		def nPairs = 0
 		def pairsUnclaimed = 0
 		def gameId = 0
+		def currentPlayer = null
+		
 		while (true) {
 			statusConfig.write("Creating")
 			nPairs = generatePairsNumber(minPairs, pairsRange)
@@ -180,7 +182,7 @@ class ControllerManager implements CSProcess{
 			createPairs (nPairs)
 			statusConfig.write("Running")
 			def running = (pairsUnclaimed != 0)
-			def currentPlayer = null
+			
 			while (running){ //start a round
 				def o = fromPlayers.read()
 				if ( o instanceof EnrolPlayer) {
@@ -233,9 +235,12 @@ class ControllerManager implements CSProcess{
 							playerMap.put(id, playerState)
 							pairsUnclaimed = pairsUnclaimed - 1
 							running = (pairsUnclaimed != 0)
+							// if all pairs have been claimed -> consume endturn and signal player its their turn
 							if (running == false) {
 								def x = fromPlayers.read()
-								toPlayers[0].write(0)
+								currentPlayer = 0
+								toPlayers[currentPlayer].write(0)
+								println "The round is finished"
 							}
 						}
 						else {
@@ -246,10 +251,10 @@ class ControllerManager implements CSProcess{
 					println toPlayers.size()
 					println (currentPlayer + 1)
 					currentPlayer = ((currentPlayer + 1) < numPlayers) ? (currentPlayer + 1) : 0 ;
-					println "$currentPlayer"
 					toPlayers[currentPlayer].write(0) // tell the player it's there turn
-				} else if ( o instanceof ArrayList<E>) { // player ends their turn
+				} else if ( o instanceof ArrayList<E>) { // update other players cards
 					for(int i = 0; i < numPlayers; i++ ) {
+						println currentPlayer
 						if (i != currentPlayer) {
 							toPlayers[i].write(o)
 						}
@@ -266,6 +271,7 @@ class ControllerManager implements CSProcess{
 					availablePlayerIds =  availablePlayerIds.sort().reverse()
 				} // end else if chain
 			} // while running
+			
 			createBoard()
 			dList.change(display, 0)
 		} // end while true

@@ -173,6 +173,7 @@ class ControllerManager implements CSProcess{
 		def gameId = 0
 		def currentPlayer = null
 		
+		
 		while (true) {
 			statusConfig.write("Creating")
 			nPairs = generatePairsNumber(minPairs, pairsRange)
@@ -238,7 +239,8 @@ class ControllerManager implements CSProcess{
 							// if all pairs have been claimed -> consume endturn and signal player its their turn
 							if (running == false) {
 								def x = fromPlayers.read()
-								currentPlayer = 0
+								//Pick the next player
+								currentPlayer = (++currentPlayer < numPlayers) ? currentPlayer : 0
 								toPlayers[currentPlayer].write(0)
 								println "The round is finished"
 								for (def i = 0; i < numPlayers; i++) {
@@ -253,13 +255,10 @@ class ControllerManager implements CSProcess{
 						}
 					}
 				} else if ( o instanceof EndTurn) { // player ends their turn
-					println toPlayers.size()
-					println (currentPlayer + 1)
-					currentPlayer = ((currentPlayer + 1) < numPlayers) ? (currentPlayer + 1) : 0 ;
+					currentPlayer = (++currentPlayer < numPlayers) ? currentPlayer : 0
 					toPlayers[currentPlayer].write(0) // tell the player it's there turn
 				} else if ( o instanceof ArrayList<E>) { // update other players cards
 					for(int i = 0; i < numPlayers; i++ ) {
-						println currentPlayer
 						if (i != currentPlayer) {
 							toPlayers[i].write(o)
 						}

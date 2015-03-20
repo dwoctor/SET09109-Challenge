@@ -300,7 +300,28 @@ class PlayerManager implements CSProcess {
 
 					def end = new EndTurn(id:myPlayerId)
 					toController.write(end)
-				} // end of if game over
+				} else { // end of if game over
+					chosenPairs = [null, null]
+					createBoard()
+					dList.change (display, 0)
+					toController.write(new GetGameDetails(id: myPlayerId))
+					gameDetails = (GameDetails)fromController.read()
+					gameId = gameDetails.gameId
+					IPconfig.write("Playing Game Number - " + gameId)
+					playerMap = gameDetails.playerDetails
+					pairsMap = gameDetails.pairsSpecification
+					playerIds = playerMap.keySet()
+					playerIds.each { p ->
+						def pData = playerMap.get(p)
+						playerNames[p].write(pData[0])
+						pairsWon[p].write(" " + pData[1])
+					}
+					// now use pairsMap to create the board
+					pairLocs = pairsMap.keySet()
+					pairLocs.each {loc ->
+						changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
+					}
+				} // end of else game over
 			} // end of while enrolled loop
 			IPlabel.write("Goodbye " + playerName + ", please close game window")
 		} //end of enrolling test

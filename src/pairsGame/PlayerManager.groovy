@@ -116,8 +116,11 @@ class PlayerManager implements CSProcess {
 		IPconfig.write(" ")
 		IPlabel.write("Connecting to the GameController")
 
+		Random rand = new Random()
+		def randomPort = rand.nextInt(7000 - 4000) + 4000
+		
 		// create Node and Net Channel Addresses
-		def nodeAddr = new TCPIPNodeAddress (4000)
+		def nodeAddr = new TCPIPNodeAddress (randomPort)
 		Node.getInstance().init (nodeAddr)
 		def toControllerAddr = new TCPIPNodeAddress ( controllerIP, 3000)
 		def toController = NetChannel.any2net(toControllerAddr, 50 )
@@ -252,6 +255,8 @@ class PlayerManager implements CSProcess {
 										break
 								} // end inner switch
 							} else if ( matchOutcome == 1) {
+//								changePairs(p1[0], p1[1], Color.WHITE, -1) // Test just removing the light gray
+//								changePairs(p2[0], p2[1], Color.WHITE, -1)
 								toController.write(new ClaimPair ( id: myPlayerId,
 								gameId: gameId,
 								p1: chosenPairs[0],
@@ -262,26 +267,26 @@ class PlayerManager implements CSProcess {
 					}// end of outer switch
 				} // end of while getting two pairs
 
-				chosenPairs = [null, null]
-				createBoard()
-				dList.change (display, 0)
-				toController.write(new GetGameDetails(id: myPlayerId))
-				gameDetails = (GameDetails)fromController.read()
-				gameId = gameDetails.gameId
-				IPconfig.write("Playing Game Number - " + gameId)
-				playerMap = gameDetails.playerDetails
-				pairsMap = gameDetails.pairsSpecification
-				playerIds = playerMap.keySet()
-				playerIds.each { p ->
-					def pData = playerMap.get(p)
-					playerNames[p].write(pData[0])
-					pairsWon[p].write(" " + pData[1])
-				}
-				// now use pairsMap to create the board
-				pairLocs = pairsMap.keySet()
-				pairLocs.each {loc ->
-					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
-				}
+//				chosenPairs = [null, null]
+//				createBoard()
+//				dList.change (display, 0)
+//				toController.write(new GetGameDetails(id: myPlayerId))
+//				gameDetails = (GameDetails)fromController.read()
+//				gameId = gameDetails.gameId
+//				IPconfig.write("Playing Game Number - " + gameId)
+//				playerMap = gameDetails.playerDetails
+//				pairsMap = gameDetails.pairsSpecification
+//				playerIds = playerMap.keySet()
+//				playerIds.each { p ->
+//					def pData = playerMap.get(p)
+//					playerNames[p].write(pData[0])
+//					pairsWon[p].write(" " + pData[1])
+//				}
+//				// now use pairsMap to create the board
+//				pairLocs = pairsMap.keySet()
+//				pairLocs.each {loc ->
+//					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
+//				}
 				
 				def end = new EndTurn(id:myPlayerId)
 				toController.write(end)

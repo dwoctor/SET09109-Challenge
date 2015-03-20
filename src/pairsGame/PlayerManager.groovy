@@ -156,25 +156,27 @@ class PlayerManager implements CSProcess {
 			def playerIds
 			def pairLocs
 			
-			chosenPairs = [null, null]
-			createBoard()
-			dList.change (display, 0)
-			toController.write(new GetGameDetails(id: myPlayerId))
-			gameDetails = (GameDetails)fromController.read()
-			gameId = gameDetails.gameId
-			IPconfig.write("Playing Game Number - " + gameId)
-			playerMap = gameDetails.playerDetails
-			pairsMap = gameDetails.pairsSpecification
-			playerIds = playerMap.keySet()
-			playerIds.each { p ->
-				def pData = playerMap.get(p)
-				playerNames[p].write(pData[0])
-				pairsWon[p].write(" " + pData[1])
-			}
-			// now use pairsMap to create the board
-			pairLocs = pairsMap.keySet()
-			pairLocs.each {loc ->
-				changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
+			if (myPlayerId != 0) {
+				chosenPairs = [null, null]
+				createBoard()
+				dList.change (display, 0)
+				toController.write(new GetGameDetails(id: myPlayerId))
+				gameDetails = (GameDetails)fromController.read()
+				gameId = gameDetails.gameId
+				IPconfig.write("Playing Game Number - " + gameId)
+				playerMap = gameDetails.playerDetails
+				pairsMap = gameDetails.pairsSpecification
+				playerIds = playerMap.keySet()
+				playerIds.each { p ->
+					def pData = playerMap.get(p)
+					playerNames[p].write(pData[0])
+					pairsWon[p].write(" " + pData[1])
+				}
+				// now use pairsMap to create the board
+				pairLocs = pairsMap.keySet()
+				pairLocs.each {loc ->
+					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
+				}
 			}
 
 			// main loop
@@ -215,7 +217,7 @@ class PlayerManager implements CSProcess {
 					}
 					c = fromController.read()
 				}
-				
+
 				if (c instanceof EndGame == false) {
 
 					if (refreshNeeded) {

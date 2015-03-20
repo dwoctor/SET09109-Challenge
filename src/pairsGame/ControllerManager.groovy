@@ -241,9 +241,9 @@ class ControllerManager implements CSProcess{
 								currentPlayer = 0
 								toPlayers[currentPlayer].write(0)
 								println "The round is finished"
-								for (i = 0; i < numPlayers; i++) {
+								for (def i = 0; i < numPlayers; i++) {
 									if (i != currentPlayer) {
-										toPlayer[i].write(new EndGame(gameId: gameId))
+										toPlayers[i].write(new EndGame(gameId: gameId))
 									}
 								}
 							}

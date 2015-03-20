@@ -241,6 +241,11 @@ class ControllerManager implements CSProcess{
 								currentPlayer = 0
 								toPlayers[currentPlayer].write(0)
 								println "The round is finished"
+								for (i = 0; i < numPlayers; i++) {
+									if (i != currentPlayer) {
+										toPlayer[i].write(new EndGame(gameId: gameId))
+									}
+								}
 							}
 						}
 						else {
@@ -259,12 +264,6 @@ class ControllerManager implements CSProcess{
 							toPlayers[i].write(o)
 						}
 					}
-				} else if ( o instanceof EndGame) { // update other players card
-					for (i = 0; i < numPlayers; i++) {
-						if (i != currentPlayer) {
-							toPlayer[i].write(new EndGame(gameId: gameId))
-						}
-					}	
 				} else {
 					def withdraw = (WithdrawFromGame)o
 					def id = withdraw.id

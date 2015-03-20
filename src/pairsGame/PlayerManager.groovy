@@ -155,7 +155,7 @@ class PlayerManager implements CSProcess {
 			def pairsMap
 			def playerIds
 			def pairLocs
-			
+
 			if (myPlayerId != 0) {
 				chosenPairs = [null, null]
 				createBoard()
@@ -184,38 +184,49 @@ class PlayerManager implements CSProcess {
 
 				def c = fromController.read()
 
+
 				chosenPairs = [null, null]
 				createBoard()
 				dList.change (display, 0)
 				toController.write(new GetGameDetails(id: myPlayerId))
 				gameDetails = (GameDetails)fromController.read()
-				gameId = gameDetails.gameId
-				IPconfig.write("Playing Game Number - " + gameId)
-				playerMap = gameDetails.playerDetails
-				pairsMap = gameDetails.pairsSpecification
-				playerIds = playerMap.keySet()
-				playerIds.each { p ->
-					def pData = playerMap.get(p)
-					playerNames[p].write(pData[0])
-					pairsWon[p].write(" " + pData[1])
-				}
-				// now use pairsMap to create the board
-				pairLocs = pairsMap.keySet()
-				pairLocs.each {loc ->
-					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
-				}
 
-				def upendedcards = []
+				def refreshing = true
 				def refreshNeeded = false
-
-				while (c instanceof ArrayList<E>) {
-					refreshNeeded = true
-					upendedcards << c
-					upendedcards.each {card ->
-						def cardData = pairsMap.get(card)
-						changePairs(card[0], card[1], cardData[1], cardData[0])
+				
+				while(refreshing) {
+					gameId = gameDetails.gameId
+					IPconfig.write("Playing Game Number - " + gameId)
+					playerMap = gameDetails.playerDetails
+					pairsMap = gameDetails.pairsSpecification
+					playerIds = playerMap.keySet()
+					playerIds.each { p ->
+						def pData = playerMap.get(p)
+						playerNames[p].write(pData[0])
+						pairsWon[p].write(" " + pData[1])
 					}
-					c = fromController.read()
+					// now use pairsMap to create the board
+					pairLocs = pairsMap.keySet()
+					pairLocs.each {loc ->
+						changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
+					}
+
+					def upendedcards = []
+
+					while (c instanceof ArrayList<E>) {
+						refreshNeeded = true
+						upendedcards << c
+						upendedcards.each {card ->
+							def cardData = pairsMap.get(card)
+							changePairs(card[0], card[1], cardData[1], cardData[0])
+						}
+						c = fromController.read()
+						if (c instanceof GameDetails == true) {
+							gameDetails = (GameDetails)c
+						} else {
+							refreshing = false;
+						}
+					}
 				}
 
 				if (c instanceof EndGame == false) {

@@ -82,8 +82,10 @@ class PlayerManager implements CSProcess {
 			yPos = yPos + graphicsPos
 			if ( p >= 0)
 				changeGraphics[4] = new GraphicsCommand.DrawString("   " + p, xPos, yPos)
-			else
+			else if (p == -1)
 				changeGraphics[4] = new GraphicsCommand.DrawString(" ??", xPos, yPos)
+			else  if (p == -2)
+				changeGraphics[4] = new GraphicsCommand.DrawString("   ", xPos, yPos)
 			dList.change(changeGraphics, 4 + (x*50) + (y*5))
 		}
 
@@ -263,8 +265,8 @@ class PlayerManager implements CSProcess {
 									// Claimed pair -> color the pair white
 									def p1 = chosenPairs[0]
 									def p2 = chosenPairs[1]
-									changePairs(p1[0], p1[1], Color.WHITE, -1)
-									changePairs(p2[0], p2[1], Color.WHITE, -1)
+									changePairs(p1[0], p1[1], Color.WHITE, -2)
+									changePairs(p2[0], p2[1], Color.WHITE, -2)
 									toController.write(new ClaimPair ( id: myPlayerId,
 									gameId: gameId,
 									p1: chosenPairs[0],

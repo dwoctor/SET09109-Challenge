@@ -260,7 +260,9 @@ class PlayerManager implements CSProcess {
 											break
 									} // end inner switch
 								} else if ( matchOutcome == 1) {
-								// Claimed pair -> color the pair white
+									// Claimed pair -> color the pair white
+									def p1 = chosenPairs[0]
+									def p2 = chosenPairs[1]
 									changePairs(p1[0], p1[1], Color.WHITE, -1)
 									changePairs(p2[0], p2[1], Color.WHITE, -1)
 									toController.write(new ClaimPair ( id: myPlayerId,

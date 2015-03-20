@@ -259,6 +259,12 @@ class ControllerManager implements CSProcess{
 							toPlayers[i].write(o)
 						}
 					}
+				} else if ( o instanceof EndGame) { // update other players card
+					for (i = 0; i < numPlayers; i++) {
+						if (i != currentPlayer) {
+							toPlayer[i].write(new EndGame(gameId: gameId))
+						}
+					}	
 				} else {
 					def withdraw = (WithdrawFromGame)o
 					def id = withdraw.id
